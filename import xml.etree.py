@@ -82,9 +82,9 @@ def generate_xml():
                 "RECEIVER": "",
                 "REGION": organization[7],
                 "REQUEST_ID": "",
-                "SENDER": "GEAMDM",
+                "SENDER": "sendername",
                 "TIMESTAMP": SentAt,
-                "TRANSACTION_ID": "BDD-2",
+                "TRANSACTION_ID": "servernode",
                 "ZONE": organization[8]
             }
         for key, value in owner_operator_info_data.items():
