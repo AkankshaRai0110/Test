@@ -15,7 +15,7 @@ cx_Oracle.init_oracle_client(lib_dir=r"C:\temp\Instant Client\instantclient_19_1
 # config.read(file)
 username="cmx_ors"
 pwd='cmx'
-dsn = cx_Oracle.makedsn("admghp02-scan.ae.ge.com", 1521, service_name="annmdp03")
+dsn = cx_Oracle.makedsn("hostname", 1521, service_name="dbname")
 con = cx_Oracle.connect(user=username, password=pwd, dsn=dsn,
                                encoding="UTF-8")
 print("Connected successfully")
@@ -41,7 +41,7 @@ Diagnostics_Downstream= workbook.add_worksheet("Diagnostics Downstream")
 Aircraft_MDM_Diag_Mon_rel= workbook.add_worksheet("Aircraft MDM Diag Mon rel")
 cursor = con.cursor()
 print('Fetching data from database.....')
-cursor.execute("select * from DQ_SP_PARAMETERS ORDER BY aged_date")
+cursor.execute("select * from table BY aged_date")
 
 res=cursor.fetchall()
 format1 = workbook.add_format({'bold': True, 'bg_color':"#95B3D7", 'border': 1})
@@ -97,7 +97,7 @@ Multiple_Engine_Lvl3.conditional_format('A2:A100',  {'type': 'date',
                                          'criteria': 'greater than',
                                          'value': date,
                                          'format': format4})
-cursor.execute("select * from DQ_SP_MUL_ENG_LVL3 WHERE MDM_DO_BVT NOT IN ('GE-PASSPORT 20-19BB1A','PASSPORT20-19BB1A') ORDER BY AGED_DATE")
+cursor.execute("select * from table WHERE MDM_DO_BVT NOT IN ('GE-PASSPORT 20-19BB1A','PASSPORT20-19BB1A') ORDER BY AGED_DATE")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -119,7 +119,7 @@ for r in res:
                                 Multiple_Engine_Lvl3.set_column(c,c,15)
          row = row + 1 
 # Sheet3=MDM Installed Not In DO
-cursor.execute("select * from DQ_SP_IFS_INSTAL_DO_SPARE_V ORDER BY aged_date")
+cursor.execute("select * from table ORDER BY aged_date")
 res=cursor.fetchall()
 MDM_Installed_not_in_DO.conditional_format("A2:M30", {"type": "formula",
                                       "criteria": '=($B2=0)',
@@ -150,7 +150,7 @@ for r in res:
                                 MDM_Installed_not_in_DO.set_column(c,c,15)
          row = row + 1        
 # Sheet4=Install
-cursor.execute("select * from DQ_SP_INSTALL_ENG_V ORDER BY aged_date")
+cursor.execute("select * from table BY aged_date")
 res=cursor.fetchall()
 Install.conditional_format("A2:Y50", {"type": "formula",
                                       "criteria": '=($B2=0)',
@@ -194,7 +194,7 @@ for r in res:
                                 Install.set_column(c,c,15)
          row = row + 1 
 #Sheet5=IFS DO ACRFT LVL3
-cursor.execute("select * from DQ_SP_IFS_DO_AIRC_TYPE_V ORDER BY aged_date")
+cursor.execute("select * from table ORDER BY aged_date")
 res=cursor.fetchall()
 IFS_DO_ARCFT_Level3.conditional_format('A2:A100',  {'type': 'date',
                                          'criteria': 'greater than',
@@ -217,7 +217,7 @@ for r in res:
          row = row + 1
 
 #("Paperclip IFS Comp")
-cursor.execute("select * from  cmx_ors.DQ_SC_ORG_P2_P3")
+cursor.execute("select * from  table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -238,7 +238,7 @@ for r in res:
          row = row + 1
 
 #("DO Flag Mismatch")
-cursor.execute("select * from DQ_SC_DO_FLAG_MISMATCH")
+cursor.execute("select * from table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -264,7 +264,7 @@ for r in res:
 
 #("Paperclip- IFS MDM Comp")
 
-cursor.execute("select * from  cmx_ors.DQ_SC_IM_PAPERCLIP_8_8")
+cursor.execute("select * from  table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -284,7 +284,7 @@ for r in res:
                                 Paperclip_IFS_MDM_Comp.set_column(c,c,15)
          row = row + 1
 
-cursor.execute("select * from dq_airc_unmerged_moni_rel")
+cursor.execute("select * from table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -297,7 +297,7 @@ for r in res:
                                 Unmerged_Tails.write(row, c, r[c],format3)
                                 Unmerged_Tails.set_column(c,c,15)
          row = row + 1
-cursor.execute("select * from dq_esn_airc_diff_moni_rel")
+cursor.execute("select * from table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -309,7 +309,7 @@ for r in res:
                                 Mon_rel_Diff_ESN_Tail.write(row, c, r[c],format3)
                                 Mon_rel_Diff_ESN_Tail.set_column(c,c,15)
          row = row + 1
-cursor.execute("select * from dq_eng_diff_moni_rel")
+cursor.execute("select * from table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -320,7 +320,7 @@ for r in res:
                                 ESN_MDM_Diag_Mon_rel.write(row, c, r[c],format3)
                                 ESN_MDM_Diag_Mon_rel.set_column(c,c,15)
          row = row + 1 
-cursor.execute("select * from dq_eng_not_enabled_moni_rel")
+cursor.execute("select * from table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -331,7 +331,7 @@ for r in res:
                                 Diagnostics_Downstream.write(row, c, r[c],format3)
                                 Diagnostics_Downstream.set_column(c,c,15)
          row = row + 1 
-cursor.execute("select * from dq_airc_diff_moni_rel")
+cursor.execute("select * from table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -344,7 +344,7 @@ for r in res:
                                 
          row = row + 1 
 
-cursor.execute("select * from DQ_SC_ENGINE_THRUST_RTG_V")
+cursor.execute("select * from table")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -366,7 +366,7 @@ for r in res:
          row = row + 1 
 
 #("Parameters-Including Spare ESNs")
-cursor.execute("SELECT a.*,b.status mdm_status ,c.status IFS_status, d.status DO_status FROM DQ_SC_IFS_DO_ENG_CFG_10_24_V a LEFT JOIN c_bo_serialized_engine b ON a.esn=b.engine_serial_num LEFT JOIN c_bo_serialized_engine_xref c ON a.esn          =c.engine_serial_num AND c.rowid_system='IFS' LEFT JOIN c_bo_serialized_engine_xref d ON a.esn =d.engine_serial_num AND d.rowid_system='DO'")
+cursor.execute("SELECT a.*,b.status mdm_status ,c.status IFS_status, d.status DO_status FROM table1 a LEFT JOIN table2 b ON a.esn=b.engine_serial_num LEFT JOIN ctable3 c ON a.esn=c.engine_serial_num AND c.rowid_system='IFS' LEFT JOIN table4 d ON a.esn =d.engine_serial_num AND d.rowid_system='DO'")
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -396,7 +396,7 @@ for r in res:
 #sheet7.autofilter_ref='A1:S1'
 
 old_ESNs_for_IFSDOENGCFG.write('A1','ESN', format1)
-cursor.execute("select * from  cmx_ors.DQ_SC_IM_ENGINE_CONFIG")
+cursor.execute("select * from  table)
 res=cursor.fetchall()
 row = 1
 for r in res:
@@ -505,7 +505,7 @@ from pathlib import Path
 DATA_DIR = Path.cwd() / 'python'
 
 df = pd.DataFrame()
-path =r'C:\Users\2009954\TCS GE Confidential\pythoncode\sample1.xlsx'
+path =r'folder_destination_path'
 writer = pd.ExcelWriter(path, engine='openpyxl',mode='r+', if_sheet_exists='replace')
 writer.book = load_workbook(path)
 writer.sheets = dict((ws.title,ws) for ws in writer.book.worksheets)
@@ -530,7 +530,7 @@ from pathlib import Path
 DATA_DIR = Path.cwd() / 'python'
 
 df = pd.DataFrame()
-path =r'C:\Users\2009954\TCS GE Confidential\pythoncode\sample1.xlsx'
+path =r'file_destination_path'
 writer = pd.ExcelWriter(path, engine='openpyxl', mode='r+', if_sheet_exists= 'replace')
 writer.book = load_workbook(path)
 writer.sheets = dict((ws.title,ws) for ws in writer.book.worksheets)
@@ -549,12 +549,12 @@ from pathlib import Path
 DATA_DIR = Path.cwd() / 'python'
 
 df = pd.DataFrame()
-path =r'C:\Users\2009954\TCS GE Confidential\pythoncode\sample1.xlsx'
+path =r'file_destination_path'
 writer = pd.ExcelWriter(path, engine='openpyxl', mode='r+', if_sheet_exists='replace')
 writer.book = load_workbook(path)
 writer.sheets = dict((ws.title,ws) for ws in writer.book.worksheets)
 orders = pd.read_excel("sample1.xlsx",sheet_name = 'Thrust Rating',engine='openpyxl')
-returns = pd.read_excel("Production_3-way_Scorecard_20230502.xlsx",sheet_name = 'Thrust Rating',engine='openpyxl')
+returns = pd.read_excel("file_name.xlsx",sheet_name = 'Thrust Rating',engine='openpyxl')
 
 df['exists']= (orders.MDM_ESN).isin(returns.MDM_ESN)
 df.to_excel(writer, sheet_name='Thrust Rating',startcol=12, index = False)
