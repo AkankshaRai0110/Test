@@ -3,32 +3,10 @@ from datetime import datetime, timedelta
 import cx_Oracle
 from configparser import ConfigParser
 
-def get_organization_data(cursor, icao_code):
+def get_organization_data(cursor, field_name):
     cursor.execute("""
-        SELECT 
-            country AS COUNTRY_CODE,
-            ICAO_CD AS IDENTITY,
-            LNG AS LANGUAGE_CODE,
-            ORG_NM AS NAME,
-            ICAO_CD AS OLD_IDENTITY,
-            ORG_TYPE AS OWNER_ATTRIBUTE,
-            STATUS AS OWNER_CODE_STAT,
-            REGION AS REGION,
-            ZONE AS ZONE,
-            CASE 
-                WHEN ORG_TYPE IN ('AIRLINE', 'AIRFRAMER', 'BUSINESS') THEN 'COMMERCIAL'
-                WHEN ORG_TYPE = 'MILITARY' THEN 'MILITARY'
-                ELSE NULL
-            END AS OWNER_TYPE_ID,
-            CASE 
-                WHEN ORG_TYPE NOT IN ('AIRLINE', 'AIRFRAMER', 'BUSINESS', 'MILITARY') THEN 'The ORG_TYPE ' || ORG_TYPE || ' given is not allowed to update in IFS'
-                ELSE NULL
-            END AS ERROR_MESSAGE
-        FROM 
-            C_BO_ORGANIZATION
-        WHERE 
-            ICAO_CD = :icao_code
-    """, icao_code=icao_code)
+        Query
+    """, field_name=field_name)
     organization = cursor.fetchone()
     # print(organization)
     # for x in organization:
@@ -46,8 +24,8 @@ def generate_xml():
     # Connect to the Oracle database
     connection = cx_Oracle.connect(user=user, password=password, dsn=dsn_tns) 
     cursor = connection.cursor()
-    icao_code = input("Enter ICAO code: ")
-    organization = get_organization_data(cursor, icao_code)
+    icao_code = input("Enter field name: ")
+    organization = get_organization_data(cursor, field_name)
     
     if organization:
 
