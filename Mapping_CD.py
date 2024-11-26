@@ -9,87 +9,15 @@ config= ConfigParser()
 config.read(file)
 mdm_user=config['username']['mdm_prod']
 mdm_pwd=config['password']['mdm']
-dsn = cx_Oracle.makedsn("admghp02-scan.ae.ge.com", 1521, service_name="annmdp03")
+dsn = cx_Oracle.makedsn("dbhostname", 1521, service_name="dbname")
 mdm_prod_connect = cx_Oracle.connect(user=mdm_user, password=mdm_pwd, dsn=dsn,
                                encoding="UTF-8")
 print("\u001b[31m MDM PROD Connected successfully \u001b[0m")
 tail_num = input('Enter the tail: ')
 
 #Mapping Query
-Mapping_query=""" Select
-sa.tail_num as MDM_TAIL ,
-sax1.tail_num as IFS_TAIL,
-sax2.tail_num as DO_TAIL,
-se.engine_serial_num as Engine_serial_num,
-ae.engine_pos_num as Engine_position,
-ecp.n1_mdfr as N1_modifier,
-ps1.product_cd as Engine_type,
-ps2.product_cd as Aircraft_type,
-org1.icao_cd as operator,
-org2.icao_cd as owner,
-org3.icao_cd as Monitor    
-from c_bo_serialized_aircraft sa
-inner join c_bo_serialized_aircraft_xref sax1
-on sa.rowid_object=sax1.rowid_object
-and sax1.hub_state_ind=1
-and sax1.rowid_system='IFS'
-and sa.hub_state_ind=1
-inner join c_bo_serialized_aircraft_xref sax2
-on sa.rowid_object=sax2.rowid_object
-and sax2.hub_state_ind=1
-and sax2.rowid_system='DO'
-and sa.hub_state_ind=1    
-inner join c_rel_aircraft_engine ae
-on sa.rowid_object=ae.serialized_aircraft_id
-and ae.hub_state_ind=1
-and ae.rel_end_date>sysdate
-join c_bo_serialized_engine se
-on ae.serialized_engine_id=se.rowid_object
-and se.hub_state_ind=1
-join c_rel_engine_family ref
-on se.rowid_object= ref.serialized_engine_id
-and ref.hub_state_ind=1
-and ref.rel_end_date>sysdate
-and ref.rel_type_code='ENGINE LVL3-ENGINE'
-join c_bo_product_structure ps1
-on ps1.rowid_object=ref.product_id
-and ps1.hub_state_ind=1
-and ps1.product_type='ENGINE-LVL3'
-join c_rel_aircraft_family raf
-on raf.serialized_aircraft_id=sa.rowid_object
-and raf.hub_state_ind=1
-and ae.rel_end_date>sysdate
-join c_bo_product_structure ps2
-on raf.product_id=ps2.rowid_object
-and ps2.hub_state_ind=1
-join c_bo_engine_config_param ecp
-on ecp.serialized_engine_id=se.rowid_object
-and ecp.hub_state_ind=1
-join c_rel_org_srlzd_aircraft osa1
-on osa1.serialized_aircraft_id=sa.rowid_object
-and osa1.hub_state_ind=1
-and osa1.rel_end_date>sysdate
-and osa1.rel_type_code='AIRCRAFT-OPERATOR'
-join c_bo_organization org1
-on osa1.org_id=org1.rowid_object
-and org1.hub_state_ind=1
-join c_rel_org_srlzd_aircraft osa2
-on osa2.serialized_aircraft_id=sa.rowid_object
-and osa2.hub_state_ind=1
-and osa2.rel_end_date>sysdate
-and osa2.rel_type_code='AIRCRAFT-OWNER'
-join c_bo_organization org2
-on osa2.org_id=org2.rowid_object
-and org2.hub_state_ind=1      
-join c_rel_org_srlzd_aircraft osa3
-on osa3.serialized_aircraft_id=sa.rowid_object
-and osa3.hub_state_ind=1
-and osa3.rel_end_date>sysdate
-and osa3.rel_type_code='AIRCRAFT-MONITOR'
-join c_bo_organization org3
-on osa3.org_id=org3.rowid_object
-and org3.hub_state_ind=1    
-where sa.tail_num = :tail_num ORDER BY ENGINE_POSITION """
+Mapping_query=""" 
+sql_query """
  
 df_mapping_query =pd.read_sql_query(Mapping_query, mdm_prod_connect ,params=[tail_num])
 ##print (df_mapping_query)
@@ -100,11 +28,11 @@ print(mf1)
 IFS_user=config['username']['fdm']
 IFS_pwd=config['password']['fdm_pwd']
 
-dsn = cx_Oracle.makedsn("ANNIFP01.ae.ge.com", 1521, service_name="ANNIFP01")
+dsn = cx_Oracle.makedsn("db2hostname", 1521, service_name="db2name")
 fdm_sage1_connect = cx_Oracle.connect(user=IFS_user, password=IFS_pwd, dsn=dsn,
                                encoding="UTF-8")
 print("\u001b[31m FDM Sage1 Connected successfully \u001b[0m")
-fdm_sage1_query=""" Select * from fms_stg_aircraft_serial_tab where tail_no = :tail_num and AIRCRAFT_STATUS_CD = 'IN_OPERATION' """
+fdm_sage1_query=""" sql_query2 """
 df_fdm_s1=pd.read_sql_query(fdm_sage1_query, fdm_sage1_connect ,params=[tail_num])
 print (df_fdm_s1)
 f1=df_fdm_s1[['AIRCRAFT_OPERATOR_CD','AIRCRAFT_OWNER_CD']]
@@ -117,11 +45,11 @@ opr_cmp1=np.where(mf1['OPERATOR'] == f1['AIRCRAFT_OPERATOR_CD'],'TRUE','FALSE')
 own_cmp1=np.where(mf1['OWNER'] == f1['AIRCRAFT_OWNER_CD'],'TRUE','FALSE')
 
 #IFS2
-dsn = cx_Oracle.makedsn("ANNIFP02.ae.ge.com", 1521, service_name="ANNIFP02")
+dsn = cx_Oracle.makedsn("db3hostname", 1521, service_name="db3name")
 fdm_sage2_connect = cx_Oracle.connect(user=IFS_user, password=IFS_pwd, dsn=dsn,
                                encoding="UTF-8")
 print("\u001b[31m FDM Sage2 Connected successfully \u001b[0m")
-fdm_sage2_query=""" Select * from fms_stg_aircraft_serial_tab where tail_no = :tail_num and AIRCRAFT_STATUS_CD = 'IN_OPERATION' """
+fdm_sage2_query=""" sql_query"""
 df_fdm_s2=pd.read_sql_query(fdm_sage2_query, fdm_sage2_connect ,params=[tail_num])
 print(df_fdm_s2)
 f2=df_fdm_s2[['AIRCRAFT_OPERATOR_CD','AIRCRAFT_OWNER_CD']]
@@ -142,7 +70,7 @@ else:
 
 #IDD Xref Verify
 #IFS SRC
-ifs_src_query=""" SELECT * FROM dq_C_L_IFS_SRLZD_AIRCRAFT WHERE TAIL_NUM = :tail_num """
+ifs_src_query=""" query """
 df_ifs_tail=pd.read_sql_query(ifs_src_query, mdm_prod_connect,params=[tail_num])
 print(df_ifs_tail)
 f_ifs_tail=df_ifs_tail[['TAIL_NUM']]
@@ -174,7 +102,7 @@ else:
 #DO Query
 DO_username=config['username']['do']
 DO_password=config['password']['do_pwd']
-do_db_connect = cx_Oracle.connect(DO_username , DO_password , "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=EVNCTPP1.ae.ge.com)(PORT=1523)))(CONNECT_DATA=(SID=EVNCTPP1)))")
+do_db_connect = cx_Oracle.connect(DO_username , DO_password , "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=hostname(PORT=1523)))(CONNECT_DATA=(SID=EVNCTPP1)))")
 print("\u001b[31m DO DB Connected successfully \u001b[0m")
 ESN1=input('Enter the ESN1: ')
 ESN2=input('Enter the ESN2: ')
@@ -182,7 +110,7 @@ DO_CD=input('Enter the DO code: ')
 do_tail_num=input('Enter DO Tail: ')
 
 #Check  engine Status
-engine_status_query=""" Select * from sge1.engine where engine_id in (:ESN1,:ESN2) and ENGINE_STATUS='ONWING' UNION Select * from sge2.engine where engine_id in (:ESN1,:ESN2) and ENGINE_STATUS='ONWING' """
+engine_status_query=""" query """
 df_esn=pd.read_sql_query(engine_status_query, do_db_connect,params=[ESN1,ESN2])
 print(df_esn)
 f_esn=df_esn[['ENGINE_ID']]
@@ -199,7 +127,7 @@ else:
     print("\u001b[33mDO Engine_Id & POS Out of sync with MDM\u001b[0m")
 
 #Check the Aircraft tail, position of the Engine 
-aircraft_data_query=""" Select * from sge1.onwing_engine where engine_id in (:ESN1,:ESN2) and removal_datetime is null UNION Select * from sge2.onwing_engine where engine_id in (:ESN1,:ESN2) and removal_datetime is null """
+aircraft_data_query=""" query """
 df_asset=pd.read_sql_query(aircraft_data_query, do_db_connect, params=[ESN1,ESN2])
 print(df_asset)
 f_asset=df_asset[['AIRCRAFT_ID','ENGINE_POSITION','ENGINE_ID','AIRCRAFT_FAMILY']]
@@ -219,7 +147,7 @@ else:
     print("\u001b[33mAircraft_Tail is Out of sync for DO & MDM\u001b[0m")
 
 #Check  Engine level3, Engine Owner, N1 modifier, TCC Timer
-engine_data_query="""Select * from sge1.engine_config where engine_id in (:ESN1,:ESN2) and current_flag='YES' AND ENGINE_OWNER !='OBSOLETE' UNION Select * from sge2.engine_config where engine_id in (:ESN1,:ESN2)  and current_flag='YES' AND ENGINE_OWNER !='OBSOLETE' """
+engine_data_query="""query """
 df_esn_lvl3=pd.read_sql_query(engine_data_query, do_db_connect, params=[ESN1,ESN2])
 print(df_esn_lvl3)
 f_esn_lvl3=df_esn_lvl3[['ENGINE_ID','ENGINE_TYPE','N1_MODIFIER']]
@@ -238,7 +166,7 @@ else:
     print("\u001b[33mDO & MDM Engine family data are Out of Sync\u001b[0m")
 
 #Check the Aircraft tail, position of the Engine
-aircraft_tail_data=""" Select * from sge1.onwing_engine WHERE aircraft_id = :do_tail_num and removal_datetime is null UNION Select * from sge2.onwing_engine WHERE aircraft_id = :do_tail_num and removal_datetime is null"""
+aircraft_tail_data=""" query"""
 df_acrft_tail_chk=pd.read_sql_query(aircraft_tail_data, do_db_connect , params=[do_tail_num])
 print(df_acrft_tail_chk)
 f_acrft_tail_chk=df_acrft_tail_chk[['AIRCRAFT_ID','ENGINE_POSITION','ENGINE_ID','AIRCRAFT_FAMILY']]
@@ -258,7 +186,7 @@ else:
     print("\u001b[33mDO & MDM are Out of sync for\u001b[0m \033[92m" , tail_num,'\033[0m')
 
 #Check Aircraft Type
-aircraft_type_data="""Select * from sge1.aircraft where aircraft_id = :do_tail_num UNION Select * from sge2.aircraft where aircraft_id = :do_tail_num """
+aircraft_type_data="""query"""
 df_acrft_type=pd.read_sql_query(aircraft_type_data, do_db_connect , params=[do_tail_num])
 print(df_acrft_type)
 f_acrft_type=df_acrft_type[['AIRCRAFT_ID','AIRCRAFT_TYPE']]
@@ -276,7 +204,7 @@ else:
     print("\u001b[33mAircraft_Type Data is Out of sync\u001b[0m")
 
 #Check DO code
-DO_cd_Query="""select * from rdo_ecs_enabled_customers where customer_code= :DO_CD """
+DO_cd_Query="""query """
 df_do_code=pd.read_sql_query(DO_cd_Query, do_db_connect , params=[DO_CD])
 print(df_do_code)
 f_do_cd=df_do_code[['CUSTOMER_CODE']]
